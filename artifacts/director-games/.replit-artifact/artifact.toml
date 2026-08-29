@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Director Games Studio Website"
+description = "A cinematic studio website for Director Games, built around the studio logo, custom PAGKAKI typography, and an animated intro experience."
+version = "1.0.0"
+id = "artifacts/director-games"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20797
+
+[services.development]
+run = "pnpm --filter @workspace/director-games run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/director-games", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/director-games/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20797"
+BASE_PATH = "/"
