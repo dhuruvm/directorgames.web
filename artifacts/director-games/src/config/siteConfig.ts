@@ -152,6 +152,8 @@ export const siteConfig = {
   },
 
   footer: {
+    logo: 'assets/director-footer-logo.png',
+    logoAlt: 'The Director Games footer logo',
     description:
       'Independent games from a small room somewhere with very good speakers.',
     headline: {

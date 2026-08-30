@@ -19,6 +19,7 @@ const assetRoot = import.meta.env.BASE_URL.endsWith('/')
   : `${import.meta.env.BASE_URL}/`;
 const assetPath = (path: string) => `${assetRoot}${path.replace(/^\/+/, '')}`;
 const logoPath = assetPath(siteConfig.brand.logo);
+const footerLogoPath = assetPath(siteConfig.footer.logo);
 const introPath = assetPath(siteConfig.brand.introVideo);
 const introSoundPath = assetPath(siteConfig.brand.introSound);
 const projects = siteConfig.games.projects;
@@ -405,7 +406,7 @@ function Home() {
 
       <footer id="contact" className="footer">
         <div className="footer-top">
-          <img className="footer-logo" src={logoPath} alt={siteConfig.brand.logoAlt} />
+          <img className="footer-logo" src={footerLogoPath} alt={siteConfig.footer.logoAlt} />
           <p>{siteConfig.footer.description}</p>
         </div>
         <div className="footer-call">

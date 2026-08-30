@@ -153,6 +153,7 @@ page, or the contact section.
 Edit `footer` to change:
 
 - Footer description
+- Footer logo and logo alt text
 - Contact headline
 - Contact email and link label
 - Newsletter placeholder, labels, and success message
