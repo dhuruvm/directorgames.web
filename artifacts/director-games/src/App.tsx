@@ -191,7 +191,6 @@ function Home() {
       <header className="site-nav">
         <a href="#top" className="nav-mark" data-testid="link-home" aria-label="The Director Games home">
           <img src={logoPath} alt="The Director Games mascot logo" />
-          <span>The Director Games</span>
         </a>
         <button
           type="button"
@@ -214,7 +213,6 @@ function Home() {
       <main id="top">
         <section className="hero" aria-labelledby="hero-title">
           <div className="hero-copy">
-            <div className="hero-kicker eyebrow">Independent game studio / Est. 2021</div>
             <h1 id="hero-title" className="display">
               Games with
               <em>direction.</em>
@@ -229,23 +227,11 @@ function Home() {
               </button>
             </div>
           </div>
-          <div className="hero-index mono" aria-hidden="true">01 / 04</div>
         </section>
-
-        <div className="ticker" aria-label="Studio principles">
-          <div className="ticker-track">
-            {[0, 1].map((copy) => (
-              <div className="ticker-item" key={copy}>
-                <b>×</b> small teams <b>×</b> big feelings <b>×</b> playable cinema <b>×</b> no filler <b>×</b> small teams <b>×</b> big feelings <b>×</b> playable cinema
-              </div>
-            ))}
-          </div>
-        </div>
 
         <section className="section reel-section" aria-labelledby="reel-title">
           <Reveal className="section-head">
             <div>
-              <span className="eyebrow">02 / The reel</span>
               <h2 id="reel-title" className="section-title display">Make a scene.</h2>
             </div>
             <p className="section-note">Every frame earns its place. Every button has a point of view.</p>
@@ -258,7 +244,6 @@ function Home() {
                 <br />
                 cut
               </div>
-              <div className="reel-stamp">PLAY<br />THE<br />UNEXPECTED</div>
               <button
                 type="button"
                 className="reel-play mono"
@@ -275,7 +260,6 @@ function Home() {
         <section id="games" className="section games-section" aria-labelledby="games-title">
           <Reveal className="section-head">
             <div>
-              <span className="eyebrow">03 / Current pictures</span>
               <h2 id="games-title" className="section-title display">The slate.</h2>
             </div>
             <p className="section-note">Three projects. Three different ways to get lost.</p>
@@ -303,7 +287,6 @@ function Home() {
             </div>
           </Reveal>
           <div className="games-cta">
-            <span className="eyebrow">More in the edit bay</span>
             <a className="text-link" href="#notes" data-testid="link-more-notes">
               Read the notes <ArrowUpRight size={15} aria-hidden="true" />
             </a>
@@ -312,7 +295,6 @@ function Home() {
 
         <section id="studio" className="section manifesto-section" aria-labelledby="manifesto-title">
           <Reveal className="manifesto-content">
-            <span className="eyebrow">04 / The studio</span>
             <h2 id="manifesto-title" className="display">
               We make
               <span>the kind of</span>
@@ -329,7 +311,6 @@ function Home() {
         <section className="section studio-section" aria-labelledby="method-title">
           <Reveal className="section-head">
             <div>
-              <span className="eyebrow">05 / How we work</span>
               <h2 id="method-title" className="section-title display">On set.</h2>
             </div>
             <p className="section-note">A small, senior crew. Fewer meetings. Better weirdness.</p>
@@ -364,14 +345,12 @@ function Home() {
         <section id="notes" className="section notes-section" aria-labelledby="notes-title">
           <Reveal className="section-head">
             <div>
-              <span className="eyebrow">06 / Field notes</span>
               <h2 id="notes-title" className="section-title display">From the edit.</h2>
             </div>
             <p className="section-note">Dispatches from the workbench, written between builds.</p>
           </Reveal>
           <div className="notes-layout">
             <Reveal className="notes-aside">
-              <span className="mono">Latest / 2024—25</span>
               <p>Production diaries, tiny discoveries, and things we learned the hard way.</p>
             </Reveal>
             <div className="notes-list">
