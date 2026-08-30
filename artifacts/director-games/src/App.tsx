@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { ArrowUpRight, Menu, Play, X } from 'lucide-react';
+import { ArrowUp, ArrowUpRight, Instagram, Menu, Play, Twitter, X, Youtube } from 'lucide-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -17,7 +17,7 @@ const assetRoot = import.meta.env.BASE_URL.endsWith('/')
   ? import.meta.env.BASE_URL
   : `${import.meta.env.BASE_URL}/`;
 const logoPath = `${assetRoot}assets/director-logo.png`;
-const introPath = `${assetRoot}assets/director-intro.mp4`;
+const introPath = `${assetRoot}assets/director-intro-new.mp4`;
 
 const projects = [
   {
@@ -409,8 +409,21 @@ function Home() {
         <div className="footer-bottom">
           <span>© 2025 The Director Games</span>
           <div className="footer-links">
-            <a href="#top" data-testid="link-back-top">Back to top</a>
-            <a href="https://www.instagram.com" target="_blank" rel="noreferrer" data-testid="link-instagram">Instagram</a>
+            <a className="back-to-top" href="#top" data-testid="link-back-top">
+              <ArrowUp size={14} aria-hidden="true" />
+              Back to top
+            </a>
+            <div className="social-links" aria-label="Social links">
+              <a className="social-link" href="https://www.instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram" data-testid="link-instagram">
+                <Instagram size={17} aria-hidden="true" />
+              </a>
+              <a className="social-link" href="https://www.youtube.com" target="_blank" rel="noreferrer" aria-label="YouTube" data-testid="link-youtube">
+                <Youtube size={18} aria-hidden="true" />
+              </a>
+              <a className="social-link" href="https://twitter.com" target="_blank" rel="noreferrer" aria-label="Twitter" data-testid="link-twitter">
+                <Twitter size={17} aria-hidden="true" />
+              </a>
+            </div>
           </div>
         </div>
       </footer>
