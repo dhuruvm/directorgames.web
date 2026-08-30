@@ -18,6 +18,7 @@ const assetRoot = import.meta.env.BASE_URL.endsWith('/')
   : `${import.meta.env.BASE_URL}/`;
 const logoPath = `${assetRoot}assets/director-logo.png`;
 const introPath = `${assetRoot}assets/director-intro-new.mp4`;
+const introSoundPath = `${assetRoot}assets/director-loading-sound.mp3`;
 
 const projects = [
   {
@@ -82,11 +83,37 @@ function Reveal({
 
 function IntroSplash({ onComplete }: { onComplete: () => void }) {
   const [leaving, setLeaving] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const finish = () => {
     if (leaving) return;
     setLeaving(true);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
     window.setTimeout(onComplete, 720);
   };
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.volume = 0.72;
+
+    const attemptPlayback = () => {
+      void audio.play().catch(() => undefined);
+    };
+
+    if (audio.readyState >= 2) {
+      attemptPlayback();
+    } else {
+      audio.addEventListener('canplay', attemptPlayback, { once: true });
+    }
+
+    return () => {
+      audio.removeEventListener('canplay', attemptPlayback);
+      audio.pause();
+    };
+  }, []);
 
   useEffect(() => {
     const fallback = window.setTimeout(finish, 5600);
@@ -103,6 +130,13 @@ function IntroSplash({ onComplete }: { onComplete: () => void }) {
         playsInline
         onEnded={finish}
         aria-label="The Director Games animated logo intro"
+      />
+      <audio
+        ref={audioRef}
+        src={introSoundPath}
+        autoPlay
+        preload="auto"
+        aria-hidden="true"
       />
       <button
         type="button"
