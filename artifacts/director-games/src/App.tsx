@@ -232,27 +232,32 @@ function Home() {
         <section className="section reel-section" aria-labelledby="reel-title">
           <Reveal className="section-head">
             <div>
-              <h2 id="reel-title" className="section-title display">Make a scene.</h2>
+              <h2 id="reel-title" className="section-title display">A first look.</h2>
             </div>
-            <p className="section-note">Every frame earns its place. Every button has a point of view.</p>
+            <p className="section-note">A small selection from the worlds we are building.</p>
           </Reveal>
           <Reveal delay="delay-1">
             <div className="reel-frame">
-              <div className="reel-word display">
-                <span>Now showing</span>
-                Director's
-                <br />
-                cut
+              <div className="reel-screen">
+                <div className="reel-word display">
+                  Director's
+                  <br />
+                  cut
+                </div>
+                <span className="reel-screen-caption">Director Games / 2025</span>
               </div>
-              <button
-                type="button"
-                className="reel-play mono"
-                onClick={() => setActiveProject(projects[0])}
-                data-testid="button-watch-reel"
-              >
-                <Play size={14} aria-hidden="true" />
-                Watch the reel
-              </button>
+              <div className="reel-copy">
+                <p>We build games with a clear point of view — intimate stories, tactile systems, and spaces that stay with you.</p>
+                <button
+                  type="button"
+                  className="reel-play mono"
+                  onClick={() => setActiveProject(projects[0])}
+                  data-testid="button-watch-reel"
+                >
+                  <Play size={14} aria-hidden="true" />
+                  View current work
+                </button>
+              </div>
             </div>
           </Reveal>
         </section>
@@ -260,9 +265,9 @@ function Home() {
         <section id="games" className="section games-section" aria-labelledby="games-title">
           <Reveal className="section-head">
             <div>
-              <h2 id="games-title" className="section-title display">The slate.</h2>
+              <h2 id="games-title" className="section-title display">Selected games.</h2>
             </div>
-            <p className="section-note">Three projects. Three different ways to get lost.</p>
+            <p className="section-note">Three projects, each with its own rhythm and reason to play.</p>
           </Reveal>
           <Reveal delay="delay-1">
             <div className="games-grid">
@@ -381,9 +386,9 @@ function Home() {
           <p>Independent games from a small room somewhere with very good speakers.</p>
         </div>
         <div className="footer-call">
-          <h2 className="display">Roll credits.<br />Stay curious.</h2>
+          <h2 className="display">Let's make something<br /><em>worth playing.</em></h2>
           <a className="text-link" href="mailto:hello@thedirectorgames.com" data-testid="link-email">
-            Say hello <ArrowUpRight size={15} aria-hidden="true" />
+            Start a conversation <ArrowUpRight size={15} aria-hidden="true" />
           </a>
         </div>
         <form className="newsletter-form" onSubmit={handleNewsletter} aria-label="Join studio mailing list">
