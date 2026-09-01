@@ -53,12 +53,14 @@ export const siteConfig = {
     projects: [
       {
         id: '01',
-        title: 'Morrow',
+        title: 'The Dreamrooms',
         type: 'Narrative adventure',
         year: 'In production',
         description:
           'A quiet world with loud consequences. Follow the light, then decide what it means.',
         visual: 'game-visual-one',
+        image: 'assets/dreamrooms-card.png',
+        imageAlt: 'The Dreamrooms game menu artwork',
         modalDescription:
           'We are building this one slowly, with a small team and an unreasonable amount of care.',
       },

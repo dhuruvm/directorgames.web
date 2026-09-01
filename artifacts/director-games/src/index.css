@@ -192,6 +192,8 @@
 .game-card:hover, .game-card:focus-visible { transform: translateY(-6px); border-color: #807d75; }
 .game-card::before { content: ''; position: absolute; inset: 0; background: var(--wash); opacity: 0; transition: opacity .35s ease; }
 .game-card:hover::before, .game-card:focus-within::before { opacity: 1; }
+.game-card-image::before { display: none; }
+.game-card-image-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
 .game-visual { position: relative; flex: none; height: 285px; overflow: hidden; border-bottom: 1px solid #3b3b38; }
 .game-visual::before, .game-visual::after { content: ''; position: absolute; }
 .game-visual-one { background: #21211f; }

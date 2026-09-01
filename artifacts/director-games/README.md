@@ -110,6 +110,7 @@ Add, remove, or reorder cards in `games.projects`. Each project supports:
 - `description`
 - `modalDescription`
 - `visual`
+- Optional `image` and `imageAlt` for an image-only card
 
 There are three built-in visual treatments:
 
