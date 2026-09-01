@@ -289,35 +289,16 @@ function Home() {
           <Reveal delay="delay-1">
             <div className="games-grid">
               {projects.map((project) => (
-                'image' in project ? (
-                  <button
-                    type="button"
-                    className="game-card game-card-image"
-                    key={project.id}
-                    onClick={() => setActiveProject(project)}
-                    data-testid={`button-project-${project.id}`}
-                    aria-label={`${siteConfig.ui.projectAriaLabel} ${project.title}`}
-                  >
-                    <img className="game-card-image-media" src={assetPath(project.image)} alt={project.imageAlt} />
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="game-card"
-                    key={project.id}
-                    onClick={() => setActiveProject(project)}
-                    data-testid={`button-project-${project.id}`}
-                    aria-label={`${siteConfig.ui.projectAriaLabel} ${project.title}`}
-                  >
-                    <div className={`game-visual ${project.visual}`} aria-hidden="true" />
-                    <div className="game-meta">
-                      <span>{project.id} / {project.type}</span>
-                      <span>{project.year}</span>
-                    </div>
-                    <h3 className="game-name display">{project.title}</h3>
-                    <p className="game-description">{project.description}</p>
-                  </button>
-                )
+                <button
+                  type="button"
+                  className="game-card game-card-image"
+                  key={project.id}
+                  onClick={() => setActiveProject(project)}
+                  data-testid={`button-project-${project.id}`}
+                  aria-label={`${siteConfig.ui.projectAriaLabel} ${project.title}`}
+                >
+                  <img className="game-card-image-media" src={assetPath(project.image)} alt={project.imageAlt} />
+                </button>
               ))}
             </div>
           </Reveal>

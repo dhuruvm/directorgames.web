@@ -54,3 +54,4 @@ No project-specific preferences recorded.
 ## Pointers
 
 - See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+- `vercel.json` configures Vercel to build and host the Director Games website from the monorepo.
