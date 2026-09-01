@@ -406,7 +406,9 @@ function Home() {
         </div>
         <a
           className="conversation-button"
-          href={`mailto:${siteConfig.footer.email}`}
+          href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(siteConfig.footer.email)}`}
+          target="_blank"
+          rel="noreferrer"
           aria-label={siteConfig.footer.emailLabel}
           data-testid="button-start-conversation"
         >
