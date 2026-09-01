@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { ArrowUp, ArrowUpRight, Instagram, Menu, Play, Twitter, X, Youtube } from 'lucide-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -206,19 +206,12 @@ function Home() {
   const [introVisible, setIntroVisible] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeProject, setActiveProject] = useState<(typeof projects)[number] | null>(null);
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
 
   const closeProject = () => setActiveProject(null);
 
   const scrollTo = (id: string) => {
     setMenuOpen(false);
     document.querySelector(id)?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleNewsletter = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (email.trim()) setSubscribed(true);
   };
 
   return (
@@ -410,29 +403,16 @@ function Home() {
             <br />
             <em>{siteConfig.footer.headline.accent}</em>
           </h2>
-          <a className="text-link" href={`mailto:${siteConfig.footer.email}`} data-testid="link-email">
-            {siteConfig.footer.emailLabel} <ArrowUpRight size={15} aria-hidden="true" />
-          </a>
         </div>
-        <form className="newsletter-form" onSubmit={handleNewsletter} aria-label={siteConfig.footer.newsletter.ariaLabel}>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(event) => { setEmail(event.target.value); setSubscribed(false); }}
-            placeholder={siteConfig.footer.newsletter.placeholder}
-            aria-label={siteConfig.ui.emailAriaLabel}
-            data-testid="input-newsletter-email"
-          />
-          <button type="submit" aria-label={siteConfig.footer.newsletter.submitAriaLabel} data-testid="button-subscribe">
-            <ArrowUpRight size={16} aria-hidden="true" />
-          </button>
-        </form>
-        {subscribed && (
-          <p className="newsletter-success" role="status" data-testid="status-newsletter-success">
-            {siteConfig.footer.newsletter.successMessage}
-          </p>
-        )}
+        <a
+          className="conversation-button"
+          href={`mailto:${siteConfig.footer.email}`}
+          aria-label={siteConfig.footer.emailLabel}
+          data-testid="button-start-conversation"
+        >
+          {siteConfig.footer.emailLabel}
+          <ArrowUpRight size={16} aria-hidden="true" />
+        </a>
         <div className="footer-bottom">
           <span>{siteConfig.footer.copyright}</span>
           <div className="footer-links">

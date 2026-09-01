@@ -280,11 +280,10 @@
 .modal p { max-width: 460px; color: #aaa79f; font-size: 13px; line-height: 1.5; }
 .modal-film { display: grid; place-items: center; height: 230px; margin-top: 26px; background: repeating-linear-gradient(0deg, #171716 0 5px, #232321 6px 7px); color: #85827a; font: 11px var(--app-font-mono); letter-spacing: .1em; text-transform: uppercase; }
 
-.newsletter-form { display: flex; max-width: 420px; margin-top: 26px; border-bottom: 1px solid #6d6a63; }
-.newsletter-form input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--paper); padding: 12px 0; outline: none; font-size: 13px; }
-.newsletter-form input::placeholder { color: #817e77; }
-.newsletter-form button { border: 0; background: transparent; color: var(--paper); cursor: pointer; padding: 12px 0 12px 14px; }
-.newsletter-success { margin: 20px 0 0; color: var(--paper); font: 10px var(--app-font-mono); letter-spacing: .1em; text-transform: uppercase; }
+.conversation-button { display: inline-flex; align-items: center; justify-content: space-between; width: min(420px, 100%); margin-top: 26px; padding: 12px 0; color: var(--paper); border-bottom: 1px solid #6d6a63; font-size: 13px; text-decoration: none; transition: border-color .25s ease, color .25s ease; }
+.conversation-button svg { transition: transform .25s ease; }
+.conversation-button:hover, .conversation-button:focus-visible { color: #77756e; border-color: var(--paper); }
+.conversation-button:hover svg, .conversation-button:focus-visible svg { transform: translate(4px, -4px); }
 
 @media (max-width: 720px) {
   .site-nav { height: 96px; }

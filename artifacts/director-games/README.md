@@ -159,7 +159,7 @@ Edit `footer` to change:
 - Footer logo and logo alt text
 - Contact headline
 - Contact email and link label
-- Newsletter placeholder, labels, and success message
+- Start-conversation button label
 - Copyright text
 - Back-to-top label
 - Social URLs and labels

@@ -164,14 +164,8 @@ export const siteConfig = {
       leading: "Let's make something",
       accent: 'worth playing.',
     },
-    email: 'hello@thedirectorgames.com',
+    email: 'studio.thedirectorgames@gmail.com',
     emailLabel: 'Start a conversation',
-    newsletter: {
-      ariaLabel: 'Join studio mailing list',
-      placeholder: 'Your email, if you want the next scene',
-      submitAriaLabel: 'Subscribe to studio notes',
-      successMessage: 'You are on the list. More soon.',
-    },
     copyright: '© 2026 The Director Games',
     backToTopLabel: 'Back to top',
     socialLinks: [
