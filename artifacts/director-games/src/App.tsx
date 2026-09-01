@@ -66,6 +66,7 @@ function Reveal({
 
 function IntroSplash({ onComplete }: { onComplete: () => void }) {
   const [leaving, setLeaving] = useState(false);
+  const [soundBlocked, setSoundBlocked] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const finish = () => {
     if (leaving) return;
@@ -77,23 +78,27 @@ function IntroSplash({ onComplete }: { onComplete: () => void }) {
     window.setTimeout(onComplete, siteConfig.ui.introExitDurationMs);
   };
 
-  useEffect(() => {
+  const attemptSoundPlayback = () => {
     const audio = audioRef.current;
     if (!audio) return;
     audio.volume = siteConfig.ui.introSoundVolume;
+    void audio.play()
+      .then(() => setSoundBlocked(false))
+      .catch(() => setSoundBlocked(true));
+  };
 
-    const attemptPlayback = () => {
-      void audio.play().catch(() => undefined);
-    };
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
 
     if (audio.readyState >= 2) {
-      attemptPlayback();
+      attemptSoundPlayback();
     } else {
-      audio.addEventListener('canplay', attemptPlayback, { once: true });
+      audio.addEventListener('canplay', attemptSoundPlayback, { once: true });
     }
 
     return () => {
-      audio.removeEventListener('canplay', attemptPlayback);
+      audio.removeEventListener('canplay', attemptSoundPlayback);
       audio.pause();
     };
   }, []);
@@ -121,6 +126,17 @@ function IntroSplash({ onComplete }: { onComplete: () => void }) {
         preload="auto"
         aria-hidden="true"
       />
+      {soundBlocked && (
+        <button
+          type="button"
+          className="intro-sound"
+          onClick={attemptSoundPlayback}
+          data-testid="button-enable-intro-sound"
+          aria-label={siteConfig.ui.introSoundEnableAriaLabel}
+        >
+          {siteConfig.ui.introSoundEnableLabel}
+        </button>
+      )}
       <button
         type="button"
         className="intro-skip"

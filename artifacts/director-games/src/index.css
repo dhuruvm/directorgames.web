@@ -144,6 +144,12 @@
   padding: 12px 0; opacity: .65; transition: opacity .25s ease;
 }
 .intro-skip:hover, .intro-skip:focus-visible { opacity: 1; }
+.intro-sound {
+  position: absolute; z-index: 2; left: 28px; bottom: 25px; color: var(--ink); background: transparent;
+  border: 0; cursor: pointer; font: 10px var(--app-font-mono); letter-spacing: .13em; text-transform: uppercase;
+  padding: 12px 0; opacity: .65; transition: opacity .25s ease;
+}
+.intro-sound:hover, .intro-sound:focus-visible { opacity: 1; }
 .intro-progress { position: absolute; z-index: 2; left: 28px; right: 28px; bottom: 31px; height: 1px; background: rgb(241 238 231 / .28); }
 .intro-progress span { display: block; height: 100%; width: 0; background: var(--ink); animation: line-in var(--intro-progress-duration, 5s) linear forwards; }
 

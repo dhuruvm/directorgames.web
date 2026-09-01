@@ -41,8 +41,9 @@ logo: 'assets/my-logo.png',
 ```
 
 The loading sound is attempted automatically when the splash opens. Some
-browsers block unmuted autoplay until the visitor interacts with the page; that
-browser rule cannot be overridden by the website.
+browsers block unmuted autoplay until the visitor interacts with the page; when
+that happens, the splash shows an `Enable sound` control so the visitor can
+unlock playback with one tap.
 
 You can also adjust:
 

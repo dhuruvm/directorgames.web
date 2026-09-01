@@ -199,6 +199,8 @@ export const siteConfig = {
   ui: {
     introSkipLabel: 'Skip intro',
     introSkipAriaLabel: 'Skip intro animation',
+    introSoundEnableLabel: 'Enable sound',
+    introSoundEnableAriaLabel: 'Enable intro sound',
     introExitDurationMs: 720,
     introFallbackDurationMs: 5600,
     introProgressDurationMs: 5000,
