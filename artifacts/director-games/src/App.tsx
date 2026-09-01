@@ -22,6 +22,7 @@ const logoPath = assetPath(siteConfig.brand.logo);
 const footerLogoPath = assetPath(siteConfig.footer.logo);
 const introPath = assetPath(siteConfig.brand.introVideo);
 const introSoundPath = assetPath(siteConfig.brand.introSound);
+const reelImagePath = assetPath(siteConfig.reel.image);
 const projects = siteConfig.games.projects;
 const socialIconMap: Record<SocialIconName, typeof Instagram> = {
   instagram: Instagram,
@@ -271,11 +272,7 @@ function Home() {
           <Reveal delay="delay-1">
             <div className="reel-frame">
               <div className="reel-screen">
-                <div className="reel-word display">
-                  {siteConfig.reel.displayLines.map((line) => (
-                    <span key={line}>{line}<br /></span>
-                  ))}
-                </div>
+                <img className="reel-image" src={reelImagePath} alt={siteConfig.reel.imageAlt} />
                 <span className="reel-screen-caption">{siteConfig.reel.caption}</span>
               </div>
               <div className="reel-copy">

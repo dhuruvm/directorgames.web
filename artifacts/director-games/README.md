@@ -90,13 +90,19 @@ introduction: {
 Edit `reel` to change:
 
 - Section title and supporting note
-- Words displayed in the dark reel panel
+- Image and alt text displayed in the reel panel
 - Caption
 - Description
 - Button label
 - Which project opens when the button is clicked
 
 `projectId` must match one of the project IDs in `games.projects`.
+
+Reel images belong in:
+
+```text
+public/assets/
+```
 
 ### Selected games
 

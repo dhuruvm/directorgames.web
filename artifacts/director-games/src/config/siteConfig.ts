@@ -40,7 +40,8 @@ export const siteConfig = {
   reel: {
     title: 'A first look.',
     description: 'A small selection from the worlds we are building.',
-    displayLines: ["Director's", 'cut'],
+    image: 'assets/director-first-look.jpg',
+    imageAlt: 'The Director Games logo displayed on a laptop in the studio',
     caption: 'Director Games / 2025',
     body: 'We build games with a clear point of view — intimate stories, tactile systems, and spaces that stay with you.',
     ctaLabel: 'View current work',

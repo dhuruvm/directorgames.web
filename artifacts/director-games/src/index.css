@@ -178,10 +178,10 @@
 .reel-section .section-note { color: #6d6b66; }
 .reel-frame { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(220px, .55fr); min-height: min(43vw, 620px); overflow: hidden; background: #d8d4ca; color: var(--paper); }
 .reel-screen { position: relative; display: grid; place-items: center; min-height: 460px; overflow: hidden; background: #151514; }
-.reel-screen::before { content: ''; position: absolute; inset: 8%; border: 1px solid #3b3b38; background: radial-gradient(circle at 70% 40%, #4b4a45, transparent 35%), linear-gradient(140deg, #262623, #0f0f0e 72%); }
-.reel-screen::after { content: ''; position: absolute; top: 0; bottom: 0; left: 63%; width: 1px; background: #383835; transform: rotate(23deg); transform-origin: center; opacity: .8; }
-.reel-word { position: relative; z-index: 1; padding: 20px; font-size: clamp(4.5rem, 11vw, 12rem); line-height: .74; text-align: center; letter-spacing: -.06em; }
-.reel-screen-caption { position: absolute; z-index: 1; left: 8%; bottom: 8%; color: #96938b; font-size: 11px; }
+.reel-screen::before { content: ''; position: absolute; z-index: 1; inset: 0; background: linear-gradient(180deg, rgb(8 8 8 / .08), rgb(8 8 8 / .48)); pointer-events: none; }
+.reel-screen::after { content: ''; position: absolute; z-index: 1; top: 0; bottom: 0; left: 63%; width: 1px; background: #383835; transform: rotate(23deg); transform-origin: center; opacity: .45; pointer-events: none; }
+.reel-image { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; filter: saturate(.82) contrast(1.04); }
+.reel-screen-caption { position: absolute; z-index: 2; left: 8%; bottom: 8%; color: #e8e4da; font-size: 11px; text-shadow: 0 1px 10px rgb(0 0 0 / .55); }
 .reel-copy { display: flex; flex-direction: column; justify-content: flex-end; padding: clamp(28px, 4vw, 56px); background: #d8d4ca; color: #151514; }
 .reel-copy p { max-width: 230px; margin: 0 0 42px; font-size: 17px; line-height: 1.35; }
 .reel-play { display: flex; gap: 12px; align-items: center; align-self: flex-start; color: #151514; border: 1px solid #77746d; background: transparent; padding: 13px 0; cursor: pointer; transition: color .25s ease, border-color .25s ease; }
