@@ -275,18 +275,6 @@ function Home() {
                 <img className="reel-image" src={reelImagePath} alt={siteConfig.reel.imageAlt} />
                 <span className="reel-screen-caption">{siteConfig.reel.caption}</span>
               </div>
-              <div className="reel-copy">
-                <p>{siteConfig.reel.body}</p>
-                <button
-                  type="button"
-                  className="reel-play mono"
-                  onClick={() => setActiveProject(projects.find((project) => project.id === siteConfig.reel.projectId) ?? projects[0])}
-                  data-testid="button-watch-reel"
-                >
-                  <Play size={14} aria-hidden="true" />
-                  {siteConfig.reel.ctaLabel}
-                </button>
-              </div>
             </div>
           </Reveal>
         </section>

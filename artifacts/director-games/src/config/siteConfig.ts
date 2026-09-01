@@ -43,9 +43,6 @@ export const siteConfig = {
     image: 'assets/director-first-look.jpg',
     imageAlt: 'The Director Games logo displayed on a laptop in the studio',
     caption: 'Director Games / 2026',
-    body: 'We build games with a clear point of view — intimate stories, tactile systems, and spaces that stay with you.',
-    ctaLabel: 'View current work',
-    projectId: '01',
   },
 
   games: {
