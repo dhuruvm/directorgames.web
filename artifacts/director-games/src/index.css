@@ -158,8 +158,7 @@
 .nav-menu { display: none; border: 0; background: transparent; color: var(--ink); padding: 8px; cursor: pointer; }
 .nav-menu svg { display: block; }
 
-.hero { position: relative; min-height: 100svh; display: flex; align-items: flex-end; padding: 170px clamp(22px, 9vw, 138px) 72px; isolation: isolate; }
-.hero::after { content: ''; position: absolute; z-index: -1; inset: 0; background: radial-gradient(ellipse at 68% 42%, #2b2b29 0, transparent 35%), linear-gradient(135deg, transparent 40%, #121211 100%); opacity: .8; }
+.hero { position: relative; min-height: 100svh; display: flex; align-items: flex-end; padding: 170px clamp(22px, 9vw, 138px) 72px; background: #000; }
 .hero-copy { max-width: 980px; }
 .hero h1 { margin: 0; max-width: 920px; font-size: clamp(4rem, 11.5vw, 11.3rem); line-height: .78; letter-spacing: -.045em; animation: rise .9s .5s ease both; }
 .hero h1 em { display: block; padding-left: clamp(22px, 9vw, 125px); font-style: normal; }
