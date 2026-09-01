@@ -42,7 +42,7 @@ export const siteConfig = {
     description: 'A small selection from the worlds we are building.',
     image: 'assets/director-first-look.jpg',
     imageAlt: 'The Director Games logo displayed on a laptop in the studio',
-    caption: 'Director Games / 2025',
+    caption: 'Director Games / 2026',
     body: 'We build games with a clear point of view — intimate stories, tactile systems, and spaces that stay with you.',
     ctaLabel: 'View current work',
     projectId: '01',
@@ -169,7 +169,7 @@ export const siteConfig = {
       submitAriaLabel: 'Subscribe to studio notes',
       successMessage: 'You are on the list. More soon.',
     },
-    copyright: '© 2025 The Director Games',
+    copyright: '© 2026 The Director Games',
     backToTopLabel: 'Back to top',
     socialLinks: [
       {
