@@ -72,8 +72,8 @@ export const siteConfig = {
         description:
           'A brutal game of chance where every decision lands with a click.',
         visual: 'game-visual-two',
-        image: 'assets/buckshot-roulette-card.jpg',
-        imageAlt: 'Buckshot Roulette poster artwork',
+        image: 'assets/the-parody-card.png',
+        imageAlt: 'The Parody Classroom Edition poster artwork',
         modalDescription:
           'A dark, close-quarters wager with rules that reveal themselves one shell at a time.',
       },
