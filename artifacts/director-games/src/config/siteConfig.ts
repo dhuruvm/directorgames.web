@@ -85,8 +85,8 @@ export const siteConfig = {
         description:
           'A sprawling western about loyalty, consequence, and the end of an era.',
         visual: 'game-visual-three',
-        image: 'assets/red-dead-redemption-2-card.jpg',
-        imageAlt: 'Red Dead Redemption II poster artwork',
+        image: 'assets/chacha-card.png',
+        imageAlt: 'Chacha Can I Get Hoya poster artwork',
         modalDescription:
           'An expansive story of outlaws, hard choices, and the people who keep riding together.',
       },
