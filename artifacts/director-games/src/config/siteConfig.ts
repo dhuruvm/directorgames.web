@@ -2,7 +2,7 @@ export type SocialIconName = 'instagram' | 'youtube' | 'twitter';
 
 export const siteConfig = {
   meta: {
-    title: 'The Director Games — Independent Game Studio',
+    title: 'Only The Director Games',
     description:
       'The Director Games makes strange, warm, replayable worlds for people who look a little closer.',
   },
