@@ -898,7 +898,7 @@ function DirectorDashboard() {
                     Continue with Google
                   </button>
                   <span className="google-sign-in-setup">
-                    Google sign-in needs to be configured with the Director email and Google OAuth credentials on the API.
+                    Set the Director email in the API’s private Google OAuth JSON and add its redirect URI to the Google Cloud OAuth client.
                   </span>
                 </>
               )}

@@ -61,14 +61,14 @@ For local Google setup, place the downloaded Google OAuth client JSON at `artifa
 {
   "director": {
     "admin_email": "the exact verified Google account allowed into /dir",
-    "redirect_uri": "https://<api-host>/api/admin/gmail/callback",
-    "frontend_url": "https://<website-origin>",
+    "redirect_uri": "http://localhost:8080/api/admin/gmail/callback",
+    "frontend_url": "http://localhost:5173",
     "session_secret": "<at least 32 random characters>"
   }
 }
 ```
 
-The downloaded `web.client_id` and `web.client_secret` are read directly from the Google JSON. Add the exact `director.redirect_uri` to the OAuth client's authorized redirect URIs in Google Cloud. `director.admin_email` is required; sign-in is disabled unless it matches the verified Google identity. Generate `director.session_secret` locally with `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`. `director.frontend_url` is the website origin used after Google redirects back. Keep a private copy of this JSON on the deployed API host as well; the credential file is deliberately not pushed to GitHub. Infrastructure settings such as database access, API port, and allowed website origins remain deployment configuration.
+The downloaded `web.client_id` and `web.client_secret` are read directly from the Google JSON. For local development, the API callback is `http://localhost:8080/api/admin/gmail/callback`; add this exact URI to the OAuth client's authorized redirect URIs in Google Cloud. For deployment, use the public API callback URL and set `director.frontend_url` to the production website origin. `director.admin_email` is required; sign-in is disabled unless it matches the verified Google identity. Generate `director.session_secret` locally with `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`. `director.frontend_url` is the website origin used after Google redirects back. Keep a private copy of this JSON on the deployed API host as well; the credential file is deliberately not pushed to GitHub. Infrastructure settings such as database access, API port, and allowed website origins remain deployment configuration.
 
 Configure the Vercel website build with `VITE_API_BASE_URL=https://<api-host>` (the API origin without `/api`). Use HTTPS for both origins. Prefer serving the API on a subdomain of the website's registrable domain (for example, `api.directorgames.studio`); unrelated cross-site domains may have their authentication cookies blocked by browser privacy settings.
 
