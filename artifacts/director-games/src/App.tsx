@@ -882,11 +882,27 @@ function DirectorDashboard() {
             <span className="eyebrow">Studio admin</span>
             <h2 className="display">Sign in to manage members.</h2>
             {!adminConfigured && !googleSignInConfigured && <p className="form-status">Admin access is not configured on the API.</p>}
-            {googleSignInConfigured && (
-              <a className="primary-button google-sign-in-button" href={`${apiRoot}/admin/google/sign-in`}>
-                Continue with Google
-              </a>
-            )}
+            <div className="google-sign-in-panel">
+              <span className="google-sign-in-mark" aria-hidden="true">G</span>
+              <div className="google-sign-in-copy">
+                <strong>Google email sign-in</strong>
+                <span>Use your authorized Google account to enter the Director dashboard.</span>
+              </div>
+              {googleSignInConfigured ? (
+                <a className="primary-button google-sign-in-button" href={`${apiRoot}/admin/google/sign-in`}>
+                  Continue with Google
+                </a>
+              ) : (
+                <>
+                  <button className="primary-button google-sign-in-button" type="button" disabled>
+                    Continue with Google
+                  </button>
+                  <span className="google-sign-in-setup">
+                    Google sign-in needs to be configured with the Director email and Google OAuth credentials on the API.
+                  </span>
+                </>
+              )}
+            </div>
             {adminConfigured && (
               <>
                 {googleSignInConfigured && <p className="form-hint">Or use the admin password.</p>}

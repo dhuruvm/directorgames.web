@@ -841,9 +841,54 @@
   gap: 18px;
 }
 
+.google-sign-in-panel {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.025);
+}
+
+.google-sign-in-mark {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: #fff;
+  color: #4285f4;
+  font: 700 19px Arial, sans-serif;
+}
+
+.google-sign-in-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.google-sign-in-copy strong {
+  color: var(--ink);
+  font: 500 13px var(--app-font-body);
+}
+
+.google-sign-in-copy span,
+.google-sign-in-setup {
+  color: var(--dim);
+  font: 12px/1.5 var(--app-font-body);
+}
+
 .google-sign-in-button {
-  width: fit-content;
+  grid-column: 1 / -1;
+  justify-content: center;
+  width: 100%;
   text-decoration: none;
+}
+
+.google-sign-in-setup {
+  grid-column: 1 / -1;
 }
 
 .admin-login-form h2,
