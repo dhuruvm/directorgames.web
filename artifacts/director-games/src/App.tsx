@@ -23,6 +23,7 @@ import {
   Youtube,
 } from 'lucide-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MEMBER_ROLES, MEMBER_TITLES } from '../../../lib/api-zod/src/member-options';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -185,6 +186,8 @@ async function downloadMemberCard(member: DirectorMember) {
   const nameTextLength = Math.min(410, member.fullName.length * nameFontSize * 0.54);
   const memberIdTextLength = Math.min(400, member.memberId.length * 10.8);
   const cityTextLength = Math.min(350, member.city.length * 9);
+  const titleTextLength = Math.min(350, member.title.length * 7.8);
+  const roleTextLength = Math.min(350, member.role.length * 7.8);
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="768" height="1224" viewBox="0 0 512 816">
       <defs>
@@ -227,6 +230,10 @@ async function downloadMemberCard(member: DirectorMember) {
       <text x="54" y="405" fill="#f5f7fa" font-size="18" textLength="${memberIdTextLength}" lengthAdjust="spacingAndGlyphs" font-family="Consolas, monospace">${escapeXml(member.memberId)}</text>
       <text x="54" y="462" fill="#cdd3de" font-size="10" font-family="Arial, sans-serif" letter-spacing="2">BASED IN</text>
       <text x="54" y="491" fill="#f5f7fa" font-size="16" textLength="${cityTextLength}" lengthAdjust="spacingAndGlyphs" font-family="Arial, sans-serif">${escapeXml(member.city)}</text>
+      <text x="54" y="535" fill="#cdd3de" font-size="9" font-family="Arial, sans-serif" letter-spacing="2">TITLE</text>
+      <text x="54" y="556" fill="#f5f7fa" font-size="14" textLength="${titleTextLength}" lengthAdjust="spacingAndGlyphs" font-family="Arial, sans-serif">${escapeXml(member.title)}</text>
+      <text x="54" y="582" fill="#cdd3de" font-size="9" font-family="Arial, sans-serif" letter-spacing="2">ROLE</text>
+      <text x="54" y="603" fill="#f5f7fa" font-size="14" textLength="${roleTextLength}" lengthAdjust="spacingAndGlyphs" font-family="Arial, sans-serif">${escapeXml(member.role)}</text>
       <line x1="52" y1="624" x2="460" y2="624" stroke="#dcd3be" stroke-opacity=".25"/>
       <text x="459" y="685" text-anchor="end" fill="#e2dbca" font-size="30" font-style="italic" font-family="Segoe Script, 'Brush Script MT', cursive">The Director</text>
       <text x="459" y="712" text-anchor="end" fill="#cdd3de" font-size="9" font-family="Arial, sans-serif">ISSUED ${escapeXml(formatDate(member.approvedAt))}</text>
@@ -514,11 +521,15 @@ function JoinPage() {
             <div className="form-row">
               <label>
                 Role
-                <input value={form.role} onChange={(event) => updateField('role', event.target.value)} placeholder="Member" />
+                <select value={form.role} onChange={(event) => updateField('role', event.target.value)}>
+                  {MEMBER_ROLES.map((role) => <option key={role} value={role}>{role}</option>)}
+                </select>
               </label>
               <label>
                 Title
-                <input value={form.title} onChange={(event) => updateField('title', event.target.value)} placeholder="Creative Operator" />
+                <select value={form.title} onChange={(event) => updateField('title', event.target.value)}>
+                  {MEMBER_TITLES.map((title) => <option key={title} value={title}>{title}</option>)}
+                </select>
               </label>
             </div>
             <div className="form-row">
@@ -558,6 +569,7 @@ function DirectorDashboard() {
   }>>([]);
   const [authenticated, setAuthenticated] = useState(false);
   const [adminConfigured, setAdminConfigured] = useState(true);
+  const [googleSignInConfigured, setGoogleSignInConfigured] = useState(false);
   const [gmailAddress, setGmailAddress] = useState('');
   const [gmailConnected, setGmailConnected] = useState(false);
   const [password, setPassword] = useState('');
@@ -577,16 +589,24 @@ function DirectorDashboard() {
     if (gmailResult === 'cancelled') setNotice('Google email connection was cancelled.');
     if (gmailResult === 'state-error') setNotice('The Google sign-in expired. Please try connecting again.');
     if (gmailResult === 'sign-in-required') setNotice('Sign in to the dashboard before connecting Gmail.');
+    const googleResult = new URLSearchParams(window.location.search).get('google');
+    if (googleResult === 'connected') setNotice('Signed in with Google.');
+    if (googleResult === 'denied') setNotice('This Google account is not authorized for Director access.');
+    if (googleResult === 'cancelled') setNotice('Google sign-in was cancelled.');
+    if (googleResult === 'state-error') setNotice('The Google sign-in expired. Please try again.');
+    if (googleResult === 'error') setNotice('Google sign-in failed. Check the OAuth setup and try again.');
 
     apiRequest<{
       authenticated: boolean;
       adminConfigured: boolean;
+      googleSignInConfigured: boolean;
       gmailConnected: boolean;
       gmailAddress?: string | null;
     }>('/admin/status')
       .then(async (status) => {
         setAuthenticated(status.authenticated);
         setAdminConfigured(status.adminConfigured);
+        setGoogleSignInConfigured(status.googleSignInConfigured);
         setGmailConnected(status.gmailConnected);
         setGmailAddress(status.gmailAddress ?? '');
         if (status.authenticated) {
@@ -713,11 +733,25 @@ function DirectorDashboard() {
   const handleMemberEdit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!editingMemberId) return;
+    const original = members.find((member) => member.memberId === editingMemberId);
+    if (!original) {
+      setNotice('The member could not be found. Refresh the dashboard and try again.');
+      return;
+    }
+    const updates: Partial<JoinMemberForm> = {};
+    for (const field of Object.keys(editingForm) as Array<keyof JoinMemberForm>) {
+      if (editingForm[field] !== original[field]) updates[field] = editingForm[field];
+    }
+    if (Object.keys(updates).length === 0) {
+      setEditingMemberId(null);
+      setNotice('No member details changed.');
+      return;
+    }
     setBusy(true);
     try {
       await apiRequest(`/admin/members/${encodeURIComponent(editingMemberId)}`, {
         method: 'PATCH',
-        body: JSON.stringify(editingForm),
+        body: JSON.stringify(updates),
       });
       await refreshMembers();
       setEditingMemberId(null);
@@ -844,24 +878,36 @@ function DirectorDashboard() {
         {loading ? (
           <div className="empty-state"><p>Connecting to the studio ledger…</p></div>
         ) : !authenticated ? (
-          <form className="member-form admin-login-form" onSubmit={handleLogin}>
+          <section className="member-form admin-login-form">
             <span className="eyebrow">Studio admin</span>
             <h2 className="display">Sign in to manage members.</h2>
-            {!adminConfigured && <p className="form-status">Admin access is not configured on the API.</p>}
-            <label>
-              Admin password
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                autoComplete="current-password"
-                required
-              />
-            </label>
-            <button type="submit" className="primary-button" disabled={busy || !adminConfigured}>
-              {busy ? 'Signing in…' : 'Sign in'}
-            </button>
-          </form>
+            {!adminConfigured && !googleSignInConfigured && <p className="form-status">Admin access is not configured on the API.</p>}
+            {googleSignInConfigured && (
+              <a className="primary-button google-sign-in-button" href={`${apiRoot}/admin/google/sign-in`}>
+                Continue with Google
+              </a>
+            )}
+            {adminConfigured && (
+              <>
+                {googleSignInConfigured && <p className="form-hint">Or use the admin password.</p>}
+                <form className="admin-password-form" onSubmit={handleLogin}>
+                  <label>
+                    Admin password
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      autoComplete="current-password"
+                      required
+                    />
+                  </label>
+                  <button type="submit" className="primary-button" disabled={busy}>
+                    {busy ? 'Signing in…' : 'Sign in'}
+                  </button>
+                </form>
+              </>
+            )}
+          </section>
         ) : (
           <div className="dashboard-content">
             <div className="dashboard-toolbar">
@@ -984,12 +1030,24 @@ function DirectorDashboard() {
                         {(Object.keys(editingForm) as Array<keyof JoinMemberForm>).map((field) => (
                           <label key={field}>
                             {field === 'fullName' ? 'Full name' : field.charAt(0).toUpperCase() + field.slice(1)}
-                            <input
-                              type={field === 'email' ? 'email' : 'text'}
-                              value={editingForm[field]}
-                              onChange={(event) => setEditingForm((current) => ({ ...current, [field]: event.target.value }))}
-                              required
-                            />
+                            {field === 'role' ? (
+                              <select value={editingForm.role} onChange={(event) => setEditingForm((current) => ({ ...current, role: event.target.value }))} required>
+                                {!MEMBER_ROLES.some((role) => role === editingForm.role) && <option value={editingForm.role} disabled>{editingForm.role} (legacy)</option>}
+                                {MEMBER_ROLES.map((role) => <option key={role} value={role}>{role}</option>)}
+                              </select>
+                            ) : field === 'title' ? (
+                              <select value={editingForm.title} onChange={(event) => setEditingForm((current) => ({ ...current, title: event.target.value }))} required>
+                                {!MEMBER_TITLES.some((title) => title === editingForm.title) && <option value={editingForm.title} disabled>{editingForm.title} (legacy)</option>}
+                                {MEMBER_TITLES.map((title) => <option key={title} value={title}>{title}</option>)}
+                              </select>
+                            ) : (
+                              <input
+                                type={field === 'email' ? 'email' : 'text'}
+                                value={editingForm[field]}
+                                onChange={(event) => setEditingForm((current) => ({ ...current, [field]: event.target.value }))}
+                                required
+                              />
+                            )}
                           </label>
                         ))}
                         <div className="dashboard-actions">

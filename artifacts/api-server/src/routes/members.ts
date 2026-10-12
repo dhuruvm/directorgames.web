@@ -22,11 +22,13 @@ import {
   directorMailConnections,
   directorMembers,
 } from "@workspace/db/schema";
+import { isMemberRole, isMemberTitle } from "@workspace/api-zod";
 import { logger } from "../lib/logger";
 
 const router = Router();
 const adminCookieName = "director_admin";
 const oauthStateCookieName = "director_gmail_state";
+const oauthFlowCookieName = "director_oauth_flow";
 const mailConnectionId = "primary";
 const loginFailures = new Map<string, { count: number; resetAt: number }>();
 const signupAttempts = new Map<string, { count: number; resetAt: number }>();
@@ -84,7 +86,6 @@ function makeAdminCookie(expiresAt: number) {
 }
 
 function isAdmin(request: Request) {
-  if (!process.env["ADMIN_PASSWORD"]) return false;
   const value = readCookie(request, adminCookieName);
   if (!value) return false;
   const [role, expiry, signature, extra] = value.split(/[.:]/);
@@ -193,7 +194,15 @@ function trimString(value: unknown, maxLength = 180) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
-function readMemberInput(body: unknown): MemberInput | undefined {
+function hasValidMemberOptions(body: unknown) {
+  if (typeof body !== "object" || body === null) return true;
+  const record = body as Record<string, unknown>;
+  const role = trimString(record["role"], 300) || "Member";
+  const title = trimString(record["title"], 300) || "Creative Operator";
+  return isMemberRole(role) && isMemberTitle(title);
+}
+
+function readMemberInput(body: unknown, allowLegacyOptions = false): MemberInput | undefined {
   if (typeof body !== "object" || body === null) return undefined;
   const record = body as Record<string, unknown>;
   const input = Object.fromEntries(
@@ -208,7 +217,8 @@ function readMemberInput(body: unknown): MemberInput | undefined {
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email) ||
     !input.role ||
     !input.title ||
-    !input.city
+    !input.city ||
+    (!allowLegacyOptions && (!isMemberRole(input.role) || !isMemberTitle(input.title)))
   ) {
     return undefined;
   }
@@ -278,6 +288,18 @@ function requireGoogleConfig() {
     throw new Error("Google OAuth credentials are not configured.");
   }
   return { clientId, clientSecret, redirectUri };
+}
+
+function isGoogleAdminSignInConfigured() {
+  const email = process.env["ADMIN_GOOGLE_EMAIL"]?.trim();
+  return Boolean(
+    process.env["SESSION_SECRET"] &&
+    process.env["GOOGLE_CLIENT_ID"] &&
+    process.env["GOOGLE_CLIENT_SECRET"] &&
+    process.env["GOOGLE_REDIRECT_URI"] &&
+    email &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+  );
 }
 
 function frontendUrl() {
@@ -381,7 +403,7 @@ router.get("/admin/status", async (request, response) => {
   } catch (error) {
     logger.error({ err: error }, "Admin session status is not configured");
     response.status(503).json({
-      error: "Set SESSION_SECRET and ADMIN_PASSWORD on the API before signing in.",
+      error: "Set SESSION_SECRET on the API before signing in.",
     });
     return;
   }
@@ -389,6 +411,7 @@ router.get("/admin/status", async (request, response) => {
     response.json({
       authenticated: false,
       adminConfigured: Boolean(process.env["ADMIN_PASSWORD"] && process.env["SESSION_SECRET"]),
+      googleSignInConfigured: isGoogleAdminSignInConfigured(),
       gmailConnected: false,
     });
     return;
@@ -397,7 +420,8 @@ router.get("/admin/status", async (request, response) => {
     const connection = await loadMailConnection();
     response.json({
       authenticated: true,
-      adminConfigured: true,
+      adminConfigured: Boolean(process.env["ADMIN_PASSWORD"] && process.env["SESSION_SECRET"]),
+      googleSignInConfigured: isGoogleAdminSignInConfigured(),
       gmailConnected: Boolean(connection),
       gmailAddress: connection?.email ?? null,
     });
@@ -454,12 +478,39 @@ router.post("/admin/logout", requireTrustedOrigin, (_request, response) => {
   response.json({ authenticated: false });
 });
 
+router.get("/admin/google/sign-in", (_request, response) => {
+  try {
+    if (!isGoogleAdminSignInConfigured()) {
+      response.status(503).send("Google Director sign-in is not configured on the API.");
+      return;
+    }
+    const { clientId, redirectUri } = requireGoogleConfig();
+    const state = randomBytes(32).toString("base64url");
+    setCookie(response, oauthStateCookieName, state, 10 * 60);
+    setCookie(response, oauthFlowCookieName, "admin-sign-in", 10 * 60);
+    const authorizationUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+    authorizationUrl.search = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      response_type: "code",
+      prompt: "select_account",
+      scope: "openid email",
+      state,
+    }).toString();
+    response.redirect(authorizationUrl.toString());
+  } catch (error) {
+    logger.error({ err: error }, "Could not start Google Director sign-in");
+    response.status(503).send("Google Director sign-in is not configured on the API.");
+  }
+});
+
 router.get("/admin/gmail/connect", (request, response) => {
   if (!requireAdmin(request, response)) return;
   try {
     const { clientId, redirectUri } = requireGoogleConfig();
     const state = randomBytes(32).toString("base64url");
     setCookie(response, oauthStateCookieName, state, 10 * 60);
+    setCookie(response, oauthFlowCookieName, "gmail", 10 * 60);
     const authorizationUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
     authorizationUrl.search = new URLSearchParams({
       client_id: clientId,
@@ -480,20 +531,23 @@ router.get("/admin/gmail/connect", (request, response) => {
 
 router.get("/admin/gmail/callback", async (request, response) => {
   const expectedState = readCookie(request, oauthStateCookieName);
+  const oauthFlow = readCookie(request, oauthFlowCookieName);
+  const isGoogleAdminSignIn = oauthFlow === "admin-sign-in";
   const submittedState = trimString(request.query["state"], 200);
   clearCookie(response, oauthStateCookieName);
-  if (!isAdmin(request)) {
+  clearCookie(response, oauthFlowCookieName);
+  if (!isGoogleAdminSignIn && !isAdmin(request)) {
     response.redirect(`${frontendUrl()}/dir?gmail=sign-in-required`);
     return;
   }
   if (!expectedState || !submittedState || expectedState !== submittedState) {
-    response.redirect(`${frontendUrl()}/dir?gmail=state-error`);
+    response.redirect(`${frontendUrl()}/dir?${isGoogleAdminSignIn ? "google" : "gmail"}=state-error`);
     return;
   }
   try {
     const code = trimString(request.query["code"], 4096);
     if (!code || request.query["error"]) {
-      response.redirect(`${frontendUrl()}/dir?gmail=cancelled`);
+      response.redirect(`${frontendUrl()}/dir?${isGoogleAdminSignIn ? "google" : "gmail"}=cancelled`);
       return;
     }
     const { clientId, clientSecret, redirectUri } = requireGoogleConfig();
@@ -516,12 +570,31 @@ router.get("/admin/gmail/callback", async (request, response) => {
     if (!tokenResult.ok || !tokenBody.access_token) {
       throw new Error(tokenBody.error_description ?? "Google did not return an access token.");
     }
-    const profileResult = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+    const profileResult = await fetch(isGoogleAdminSignIn
+      ? "https://openidconnect.googleapis.com/v1/userinfo"
+      : "https://www.googleapis.com/oauth2/v2/userinfo", {
       headers: { Authorization: `Bearer ${tokenBody.access_token}` },
     });
-    const profile = (await profileResult.json()) as { email?: string };
+    const profile = (await profileResult.json()) as {
+      email?: string;
+      email_verified?: boolean;
+    };
     if (!profileResult.ok || !profile.email) {
       throw new Error("Google did not return the connected account email.");
+    }
+    if (isGoogleAdminSignIn) {
+      const approvedEmail = process.env["ADMIN_GOOGLE_EMAIL"]?.trim().toLowerCase();
+      if (
+        !isGoogleAdminSignInConfigured() ||
+        profile.email_verified !== true ||
+        profile.email.toLowerCase() !== approvedEmail
+      ) {
+        response.redirect(`${frontendUrl()}/dir?google=denied`);
+        return;
+      }
+      setCookie(response, adminCookieName, makeAdminCookie(Date.now() + 8 * 60 * 60 * 1000), 8 * 60 * 60);
+      response.redirect(`${frontendUrl()}/dir?google=connected`);
+      return;
     }
     const db = await getDatabase();
     const [previousConnection] = await db
@@ -554,8 +627,8 @@ router.get("/admin/gmail/callback", async (request, response) => {
       });
     response.redirect(`${frontendUrl()}/dir?gmail=connected`);
   } catch (error) {
-    logger.error({ err: error }, "Could not finish Gmail OAuth");
-    response.redirect(`${frontendUrl()}/dir?gmail=error`);
+    logger.error({ err: error }, "Could not finish Google OAuth");
+    response.redirect(`${frontendUrl()}/dir?${isGoogleAdminSignIn ? "google" : "gmail"}=error`);
   }
 });
 
@@ -573,6 +646,10 @@ router.post("/members", async (request, response) => {
   }
   const input = readMemberInput(request.body);
   if (!input) {
+    if (!hasValidMemberOptions(request.body)) {
+      response.status(400).json({ error: "Choose a valid role and title from the available options." });
+      return;
+    }
     response.status(400).json({ error: "Add a valid name and email address." });
     return;
   }
@@ -751,7 +828,7 @@ router.post("/admin/members/import", requireTrustedOrigin, async (request, respo
     const db = await getDatabase();
     let importedCount = 0;
     for (const record of records) {
-      const input = readMemberInput(record);
+      const input = readMemberInput(record, true);
       if (!input) continue;
       const value = record as Record<string, unknown>;
       const issuedDate = typeof value["issuedAt"] === "string" ? new Date(value["issuedAt"]) : new Date();
@@ -797,6 +874,14 @@ router.patch("/admin/members/:memberId", requireTrustedOrigin, async (request, r
       const value = trimString(body[field], 300);
       if (!value) {
         response.status(400).json({ error: `${field} cannot be empty.` });
+        return;
+      }
+      if (field === "role" && !isMemberRole(value)) {
+        response.status(400).json({ error: "Choose a role from the available options." });
+        return;
+      }
+      if (field === "title" && !isMemberTitle(value)) {
+        response.status(400).json({ error: "Choose a title from the available options." });
         return;
       }
       updates[field] = field === "email" ? value.toLowerCase() : value;

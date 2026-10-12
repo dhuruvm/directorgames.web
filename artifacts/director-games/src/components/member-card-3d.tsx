@@ -491,6 +491,18 @@ function drawCardArtwork(engine: CardEngine, member: MemberCardData, logo: HTMLI
       context.fillStyle = FRONT_INK;
       context.font = '500 16px Arial, sans-serif';
       context.fillText(location.toUpperCase(), 54, 491, 350);
+      context.fillStyle = FRONT_MUTED;
+      context.font = '500 9px Arial, sans-serif';
+      drawTrackedText(context, 'TITLE', 54, 535, 2);
+      context.fillStyle = FRONT_INK;
+      context.font = '500 14px Arial, sans-serif';
+      context.fillText(member.title || 'CREATIVE OPERATOR', 54, 556, 350);
+      context.fillStyle = FRONT_MUTED;
+      context.font = '500 9px Arial, sans-serif';
+      drawTrackedText(context, 'ROLE', 54, 582, 2);
+      context.fillStyle = FRONT_INK;
+      context.font = '500 14px Arial, sans-serif';
+      context.fillText(member.role || 'MEMBER', 54, 603, 350);
       context.strokeStyle = 'rgba(220,211,190,0.25)';
       context.beginPath();
       context.moveTo(52, 624);

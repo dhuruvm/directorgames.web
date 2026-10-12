@@ -352,7 +352,8 @@
 }
 
 .member-form input,
-.member-form textarea {
+.member-form textarea,
+.member-form select {
   background: rgba(255,255,255,0.02);
   border: 1px solid var(--line);
   padding: 15px 16px;
@@ -364,9 +365,19 @@
 }
 
 .member-form input:focus,
-.member-form textarea:focus {
+.member-form textarea:focus,
+.member-form select:focus {
   border-color: rgba(241,238,231,0.7);
   box-shadow: 0 0 0 1px rgba(241,238,231,0.2);
+}
+
+.member-form select {
+  color-scheme: dark;
+}
+
+.member-form select option {
+  background: #171715;
+  color: var(--ink);
 }
 
 .form-row {
@@ -824,6 +835,17 @@
   max-width: 520px;
 }
 
+.admin-password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.google-sign-in-button {
+  width: fit-content;
+  text-decoration: none;
+}
+
 .admin-login-form h2,
 .broadcast-heading h2,
 .dashboard-section-heading h2,
@@ -1102,7 +1124,8 @@
   padding: 16px;
 }
 
-.member-edit-form input {
+.member-edit-form input,
+.member-edit-form select {
   padding: 11px 12px;
   font-size: 14px;
 }
@@ -2091,7 +2114,8 @@
   text-transform: none;
 }
 
-.join-grid > .member-form input {
+.join-grid > .member-form input,
+.join-grid > .member-form select {
   min-width: 0;
   padding: 13px 14px;
   border-color: #37352f;

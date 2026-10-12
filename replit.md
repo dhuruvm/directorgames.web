@@ -41,14 +41,17 @@ An imported pnpm workspace containing the Director Games studio website, its moc
 
 ## Member administration and studio email
 
-Membership applications are stored in PostgreSQL and administered at `/dir`, which remains directly accessible but is not linked from public navigation. `/join` is likewise directly accessible and not linked publicly. Member data and dashboard actions require the admin password. New applications remain pending and do not receive a card or welcome email until the Director approves them. Approval issues the signed membership card and sends a welcome email if Gmail is connected; email failures are reported in the dashboard and can be retried from the approved-member ledger. Broadcasts are sent individually to active, approved members, and delivery totals are recorded. Cards from the former browser-local ledger can be imported from that browser after admin sign-in; imported records also remain pending until reviewed.
+Membership applications are stored in PostgreSQL and administered at `/dir`, which remains directly accessible but is not linked from public navigation. `/join` is likewise directly accessible and not linked publicly. Dashboard access supports a Google sign-in restricted to the exact verified address in `ADMIN_GOOGLE_EMAIL`; `ADMIN_PASSWORD` remains an optional fallback. New applications remain pending and do not receive a card or welcome email until the Director approves them. Approval issues the signed membership card and sends a welcome email if Gmail is connected; email failures are reported in the dashboard and can be retried from the approved-member ledger. Broadcasts are sent individually to active, approved members, and delivery totals are recorded. Cards from the former browser-local ledger can be imported from that browser after admin sign-in; imported records also remain pending until reviewed.
+
+Membership role and title are selected from shared fixed option lists on the application and member-edit forms. The API enforces those choices for new applications and edits; legacy imported values are preserved until changed. Both fields appear on the live card and its downloadable signed image.
 
 Each application stores its requester IP address and accepts at most one application per IP address and email. The IP is visible only in the authenticated Director dashboard. Applicants are notified before submitting; shared networks share the one-application-per-IP limit. The API uses Express's `request.ip`; set `TRUST_PROXY_HOPS` to the exact number of trusted reverse-proxy hops in front of the API (for example, `1` behind one trusted proxy). Leave it at `0` when the API is directly exposed. Do not trust forwarded client IP headers unless requests can only arrive through the configured trusted proxy chain.
 
 Configure the API host with these deployment secrets:
 
 - `DATABASE_URL` — PostgreSQL connection string.
-- `ADMIN_PASSWORD` — password for `/dir` admin sign-in.
+- `ADMIN_GOOGLE_EMAIL` — exact Google account email permitted to sign in directly to `/dir`; the Google account must be verified.
+- `ADMIN_PASSWORD` — optional password fallback for `/dir` admin sign-in.
 - `SESSION_SECRET` — random secret used to sign the eight-hour admin session.
 - `GMAIL_TOKEN_ENCRYPTION_KEY` — 32-byte key encoded as 64 hexadecimal characters; it encrypts the stored Gmail refresh token.
 - `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` — Google OAuth web-client credentials.
@@ -59,7 +62,7 @@ Configure the API host with these deployment secrets:
 
 Configure the Vercel website build with `VITE_API_BASE_URL=https://<api-host>` (the API origin without `/api`). Use HTTPS for both origins. Prefer serving the API on a subdomain of the website's registrable domain (for example, `api.directorgames.studio`); unrelated cross-site domains may have their authentication cookies blocked by browser privacy settings.
 
-In Google Cloud, enable the Gmail API, configure the OAuth consent screen, create a Web application OAuth client, and add the exact `GOOGLE_REDIRECT_URI` as an authorized redirect URI. The API requests Gmail send and account-email scopes. After setting up PostgreSQL or changing the database schema, apply it with `pnpm --filter @workspace/db run push` before deploying the API. Then use **Connect Gmail** from `/dir`.
+In Google Cloud, enable the Gmail API, configure the OAuth consent screen, create a Web application OAuth client, and add the exact `GOOGLE_REDIRECT_URI` as an authorized redirect URI. The same callback handles `/dir` sign-in and Gmail connection. Google sign-in requests OpenID and email identity; only the verified `ADMIN_GOOGLE_EMAIL` is issued a Director session. Gmail connection additionally requests Gmail send access. After setting up PostgreSQL or changing the database schema, apply it with `pnpm --filter @workspace/db run push` before deploying the API. Use **Continue with Google** on `/dir` to sign in and **Connect Gmail** to authorize member email.
 
 Generate secrets locally; never commit them or send them in chat. For example:
 
