@@ -6,6 +6,8 @@ import {
   randomInt,
   timingSafeEqual,
 } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import {
   Router,
   type NextFunction,
@@ -72,9 +74,21 @@ function clearCookie(response: Response, name: string) {
 }
 
 function getSessionSecret() {
-  const secret = process.env["SESSION_SECRET"];
-  if (!secret) throw new Error("SESSION_SECRET is not configured.");
+  const secret = readGoogleConfigFile().director["session_secret"];
+  if (typeof secret !== "string" || secret.length < 32) {
+    throw new Error("director.session_secret must contain at least 32 characters in the Google OAuth JSON file.");
+  }
   return secret;
+}
+
+function isSessionSigningConfigured() {
+  try {
+    getSessionSecret();
+    return true;
+  } catch (error) {
+    logger.warn({ err: error }, "Admin session signing is not configured");
+    return false;
+  }
 }
 
 function makeAdminCookie(expiresAt: number) {
@@ -280,31 +294,87 @@ function decryptToken(value: string) {
   ]).toString("utf8");
 }
 
-function requireGoogleConfig() {
-  const clientId = process.env["GOOGLE_CLIENT_ID"];
-  const clientSecret = process.env["GOOGLE_CLIENT_SECRET"];
-  const redirectUri = process.env["GOOGLE_REDIRECT_URI"];
-  if (!clientId || !clientSecret || !redirectUri) {
-    throw new Error("Google OAuth credentials are not configured.");
+function readGoogleConfigFile() {
+  const configPaths = [
+    path.resolve(process.cwd(), "artifacts/api-server/google-oauth-credentials.json"),
+    path.resolve(process.cwd(), "google-oauth-credentials.json"),
+  ];
+  const configPath = configPaths.find((candidate) => existsSync(candidate));
+  if (!configPath) {
+    throw new Error(
+      "Google OAuth JSON is missing. Place google-oauth-credentials.json in artifacts/api-server.",
+    );
   }
-  return { clientId, clientSecret, redirectUri };
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(configPath, "utf8")) as unknown;
+  } catch (error) {
+    throw new Error("Google OAuth JSON could not be read.", { cause: error });
+  }
+  if (typeof parsed !== "object" || parsed === null) {
+    throw new Error("Google OAuth JSON must contain web and director objects.");
+  }
+  const record = parsed as Record<string, unknown>;
+  const web = record["web"];
+  const director = record["director"];
+  if (
+    typeof web !== "object" ||
+    web === null ||
+    typeof director !== "object" ||
+    director === null
+  ) {
+    throw new Error("Google OAuth JSON must contain both web and director objects.");
+  }
+  return {
+    web: web as Record<string, unknown>,
+    director: director as Record<string, unknown>,
+  };
+}
+
+function requireGoogleConfig() {
+  const { web, director } = readGoogleConfigFile();
+  const clientId = typeof web["client_id"] === "string" ? web["client_id"] : "";
+  const clientSecret = typeof web["client_secret"] === "string" ? web["client_secret"] : "";
+  const redirectUri = typeof director["redirect_uri"] === "string" ? director["redirect_uri"].trim() : "";
+  if (!clientId || !clientSecret || !redirectUri) {
+    throw new Error(
+      "Google OAuth JSON must include web.client_id, web.client_secret, and director.redirect_uri.",
+    );
+  }
+  return { clientId, clientSecret, redirectUri, director };
 }
 
 function isGoogleAdminSignInConfigured() {
-  const email = process.env["ADMIN_GOOGLE_EMAIL"]?.trim();
-  return Boolean(
-    process.env["SESSION_SECRET"] &&
-    process.env["GOOGLE_CLIENT_ID"] &&
-    process.env["GOOGLE_CLIENT_SECRET"] &&
-    process.env["GOOGLE_REDIRECT_URI"] &&
-    email &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
-  );
+  try {
+    const { director } = requireGoogleConfig();
+    const email = typeof director["admin_email"] === "string"
+      ? director["admin_email"].trim()
+      : "";
+    const sessionSecret = typeof director["session_secret"] === "string"
+      ? director["session_secret"]
+      : "";
+    const frontendUrl = typeof director["frontend_url"] === "string"
+      ? director["frontend_url"].trim()
+      : "";
+    return Boolean(
+      sessionSecret.length >= 32 &&
+      frontendUrl &&
+      email &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+    );
+  } catch (error) {
+    logger.warn({ err: error }, "Google Director sign-in is not configured");
+    return false;
+  }
 }
 
 function frontendUrl() {
-  const value = process.env["FRONTEND_URL"];
-  if (!value) throw new Error("FRONTEND_URL is not configured.");
+  const { director } = readGoogleConfigFile();
+  const configuredUrl = typeof director["frontend_url"] === "string"
+    ? director["frontend_url"].trim()
+    : "";
+  const value = configuredUrl;
+  if (!value) throw new Error("director.frontend_url is not configured in the Google OAuth JSON file.");
   return value.replace(/\/+$/, "");
 }
 
@@ -403,14 +473,14 @@ router.get("/admin/status", async (request, response) => {
   } catch (error) {
     logger.error({ err: error }, "Admin session status is not configured");
     response.status(503).json({
-      error: "Set SESSION_SECRET on the API before signing in.",
+      error: "Configure director.session_secret in the private Google OAuth JSON file before signing in.",
     });
     return;
   }
   if (!authenticated) {
     response.json({
       authenticated: false,
-      adminConfigured: Boolean(process.env["ADMIN_PASSWORD"] && process.env["SESSION_SECRET"]),
+        adminConfigured: Boolean(process.env["ADMIN_PASSWORD"] && isSessionSigningConfigured()),
       googleSignInConfigured: isGoogleAdminSignInConfigured(),
       gmailConnected: false,
     });
@@ -420,7 +490,7 @@ router.get("/admin/status", async (request, response) => {
     const connection = await loadMailConnection();
     response.json({
       authenticated: true,
-      adminConfigured: Boolean(process.env["ADMIN_PASSWORD"] && process.env["SESSION_SECRET"]),
+      adminConfigured: Boolean(process.env["ADMIN_PASSWORD"] && isSessionSigningConfigured()),
       googleSignInConfigured: isGoogleAdminSignInConfigured(),
       gmailConnected: Boolean(connection),
       gmailAddress: connection?.email ?? null,
@@ -432,7 +502,7 @@ router.get("/admin/status", async (request, response) => {
 
 router.post("/admin/login", requireTrustedOrigin, (request, response) => {
   const configuredPassword = process.env["ADMIN_PASSWORD"];
-  if (!configuredPassword || !process.env["SESSION_SECRET"]) {
+  if (!configuredPassword || !isSessionSigningConfigured()) {
     response.status(503).json({ error: "Admin sign-in is not configured on the API." });
     return;
   }
@@ -583,7 +653,10 @@ router.get("/admin/gmail/callback", async (request, response) => {
       throw new Error("Google did not return the connected account email.");
     }
     if (isGoogleAdminSignIn) {
-      const approvedEmail = process.env["ADMIN_GOOGLE_EMAIL"]?.trim().toLowerCase();
+      const { director } = requireGoogleConfig();
+      const approvedEmail = typeof director["admin_email"] === "string"
+        ? director["admin_email"].trim().toLowerCase()
+        : "";
       if (
         !isGoogleAdminSignInConfigured() ||
         profile.email_verified !== true ||

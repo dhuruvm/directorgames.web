@@ -47,3 +47,6 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Private Google OAuth credentials and Director authentication settings
+/artifacts/api-server/google-oauth-credentials.json
